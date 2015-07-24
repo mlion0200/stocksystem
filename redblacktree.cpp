@@ -13,8 +13,8 @@ Node<T>* RedBlackTree<T>::CopyTree(Node<T>* thisnode, Node<T>* sourcenode, Node<
   thisnode = new Node<T>(sourcenode->data);
   thisnode->p = parentnode;
   thisnode->is_black = sourcenode->is_black;
-  if (thisnode->p != NULL)
-    cout << "current node " << thisnode->data << " is black " << thisnode->is_black << " parent is " << thisnode->p->data <<endl;
+  //if (thisnode->p != NULL)
+  //  cout << "current node " << thisnode->data << " is black " << thisnode->is_black << " parent is " << thisnode->p->data <<endl;
   thisnode->left = CopyTree(thisnode->left, sourcenode->left, thisnode);
   thisnode->right = CopyTree(thisnode->right, sourcenode->right, thisnode);
 
@@ -24,14 +24,33 @@ Node<T>* RedBlackTree<T>::CopyTree(Node<T>* thisnode, Node<T>* sourcenode, Node<
 template <class T>
 void RedBlackTree<T>::RemoveAll(Node<T>* node)
 {
-
+  if (node == NULL)
+  {
+    return;
+  }
+  RemoveAll(node->left);
+  RemoveAll(node->right);
+  if (node->p == NULL)
+  {
+    delete node;
+  }
+  if (node == node->p->left)
+  {
+    node->p->left = NULL;
+    delete node;
+  }
+  else
+  {
+    node->p->right = NULL;
+    delete node;
+  }
 }
 
 template <class T>
 void RedBlackTree<T>::RBDeleteFixUp(Node<T>* x, Node<T>* xparent, bool xisleftchild)
 {
   Node<T>* y;
-  while ((x == NULL) || (x != root && x->is_black == true))
+  while (x != root && x->is_black == true)
   {
     if (xisleftchild)
     {
@@ -235,11 +254,14 @@ bool RedBlackTree<T>::Remove(T item)
   {
     x = y->left;
   }
-  else 
+  else
   {
     x = y->right;
+  } 
+  if (y->left != NULL || y->right != NULL)
+  {
+    x->p = y->p;
   }
-  x->p = y->p;
 
   if (y->p == NULL)
   {
@@ -264,17 +286,19 @@ bool RedBlackTree<T>::Remove(T item)
     z->data = y->data;
   }
 
-  if (y->is_black == true)
+  if (x != NULL && y->is_black == true)
   {
     RBDeleteFixUp(x, x->p, isLeftChild);
   }
+  delete x;
+  size--;
   return true;
 }
 
 template <class T>
 void RedBlackTree<T>::RemoveAll()
 {
-
+  RemoveAll(root);
 }
 
 template <class T>
@@ -286,7 +310,18 @@ unsigned int RedBlackTree<T>::Size() const
 template <class T>
 unsigned int RedBlackTree<T>::Height() const
 {
-
+  Node<T>* tmp = root;
+  unsigned int height = 0;
+  while (tmp != NULL)
+  {
+    if (tmp->is_black == true)
+    {
+      height++;
+    }
+    tmp = tmp->left;
+  }
+  height++;
+  return height;
 }
 
 #endif
